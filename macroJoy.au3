@@ -128,6 +128,7 @@ Func isSequencePressed($joy, ByRef $seq, $inx)
    $inx = $inx * $_mjSize
    Local $lim = UBound($seq[$inx + $_mjSequence]) - 1
    Local $btn
+   Local $joyCode, $joyCodeCondition
    Local $count = 0
    If $seq[$inx + $_mjProcess] <> '0' Then
       If Not ProcessExists($seq[$inx + $_mjProcess]) Then Return False
@@ -136,7 +137,9 @@ Func isSequencePressed($joy, ByRef $seq, $inx)
    If $seq[$inx + $_mjPushType] = 1 Then
       For $i = 0 To $lim
          $btn = StringSplit(($seq[$inx + $_mjSequence])[$i], ",", $STR_NOCOUNT) ; split button-id and value
-         If $joy[$_joyData + $btn[0] - 1] = Int($btn[1]) Then ; check joyid.code is pressed
+         $joyCode = $joy[$_joyData + $btn[0] - 1]
+         $joyCodeCondition = (UBound($btn) = 3 And Int($btn[1]) <= $joyCode And $joyCode <= Int($btn[2])) Or ($joyCode = Int($btn[1]))
+         If $joyCodeCondition Then ; check joyid.code is pressed
             $count += 1
          Else
             $seq[$inx + $_mjDeltaTime] = 0 ; reset timing
@@ -162,7 +165,9 @@ Func isSequencePressed($joy, ByRef $seq, $inx)
          $seq[$inx + $_mjDeltaTime] = 0
          Return False
       EndIf
-      If $joy[$_joyData + $btn[0] - 1] = Int($btn[1]) Then ; check joyid.code is pressed
+      $joyCode = $joy[$_joyData + $btn[0] - 1]
+      $joyCodeCondition = (UBound($btn) = 3 And Int($btn[1]) <= $joyCode And $joyCode <= Int($btn[2])) Or ($joyCode = Int($btn[1]))
+      If $joyCodeCondition Then ; check joyid.code is pressed
          $seq[$inx + $_mjCount] += 1
          If $seq[$inx + $_mjCount] > $lim Then
             $seq[$inx + $_mjCount] = 0
@@ -171,7 +176,9 @@ Func isSequencePressed($joy, ByRef $seq, $inx)
          EndIf
       ElseIf $seq[$inx + $_mjCount] > 0 Then
          $btn = StringSplit(($seq[$inx + $_mjSequence])[$seq[$inx + $_mjCount] - 1], ",", $STR_NOCOUNT)
-         If ($joy[$_joyData + $btn[0] - 1] <> Int($btn[1])) Then
+         $joyCode = $joy[$_joyData + $btn[0] - 1]
+         $joyCodeCondition = (UBound($btn) = 3 And Int($btn[1]) <= $joyCode And $joyCode <= Int($btn[2])) Or ($joyCode = Int($btn[1]))
+         If Not $joyCodeCondition Then
             $seq[$inx + $_mjCount] = 0
             $seq[$inx + $_mjDeltaTime] = 0
          EndIf
